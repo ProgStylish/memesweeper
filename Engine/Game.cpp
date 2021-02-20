@@ -20,11 +20,13 @@
  ******************************************************************************************/
 #include "MainWindow.h"
 #include "Game.h"
+#include "Vei2.h"
 
-Game::Game( MainWindow& wnd )
+Game::Game(MainWindow& wnd)
 	:
-	wnd( wnd ),
-	gfx( wnd )
+	wnd(wnd),
+	gfx(wnd),
+	tilesField(20)
 {
 }
 
@@ -38,8 +40,12 @@ void Game::Go()
 
 void Game::UpdateModel()
 {
+	if (wnd.mouse.LeftIsPressed()) {
+		tilesField.revealTile(Vei2(wnd.mouse.GetPosX(), wnd.mouse.GetPosY()));
+	}
 }
 
 void Game::ComposeFrame()
 {
+	tilesField.draw(gfx);
 }

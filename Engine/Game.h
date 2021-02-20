@@ -23,6 +23,7 @@
 #include "Keyboard.h"
 #include "Mouse.h"
 #include "Graphics.h"
+#include "TilesField.h"
 
 class Game
 {
@@ -40,6 +41,7 @@ private:
 private:
 	MainWindow& wnd;
 	Graphics gfx;
+	TilesField tilesField;
 	/********************************/
 	/*  User Variables              */
 	/********************************/
