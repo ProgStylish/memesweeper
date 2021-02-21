@@ -41,5 +41,11 @@ private:
 	static constexpr int fieldWidthInTiles = 10;
 	static constexpr int fieldHeightInTiles = 15;
 	static constexpr int fieldSizeInTiles = fieldWidthInTiles * fieldHeightInTiles;
+	static constexpr int xPositionOnScreen = Graphics::ScreenWidth / 2 - (fieldWidthInTiles * SpriteCodex::tileSize)/2;
+	static constexpr int yPositionOnScreen = Graphics::ScreenHeight / 2 - (fieldHeightInTiles * SpriteCodex::tileSize)/2;
+	static constexpr int playableWestXPosition = xPositionOnScreen + SpriteCodex::tileSize;
+	static constexpr int playableEastXPosition = xPositionOnScreen + (fieldWidthInTiles-1)*SpriteCodex::tileSize;
+	static constexpr int playableNorthyPosition = yPositionOnScreen + SpriteCodex::tileSize;
+	static constexpr int playableSouthyPosition = yPositionOnScreen + (fieldHeightInTiles-1)*SpriteCodex::tileSize;
 	Tile tilesArray[fieldSizeInTiles];
 };
