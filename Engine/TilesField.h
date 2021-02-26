@@ -14,16 +14,24 @@ private:
 		bool isMined() const;
 		void setMined(bool mined);
 		void reveal();
+		void flag();
 		void setMinesNumber(int minesNumber);
+		bool isExploited() const;
+		void exploit();
+		State getState() const;
+		void unFlag();
 	private:
-		State state = State::Hidden;
 		bool mined = false;
+		bool exploited = false;
 		int minesNumber;
+		State state = State::Hidden;
 	};
 public:
 	TilesField(int minesNumber);
 	void draw(Graphics& gfx) const;
 	void revealTile(Vei2& positionInPixels);
+	void revealNeighboursTiles(const Vei2 tilePosition);
+	void revealMinedTiles();
 	void flagTile(Vei2& positionInPixels);
 private:
 	//Functions
@@ -33,13 +41,15 @@ private:
 	void revealAll();
 	int getMinesSurroundingNumber(const Vei2& positionInTiles) const;
 	//Variables
+	bool fuckedUp = false;
+	int revealedTilesCounter = 0;
 	std::random_device rd;
 	std::mt19937 rng;
 	std::uniform_int_distribution<int> horizontalRange;
 	std::uniform_int_distribution<int> verticalRange;
 	const int minesNumber;
-	static constexpr int fieldWidthInTiles = 10;
-	static constexpr int fieldHeightInTiles = 15;
+	static constexpr int fieldWidthInTiles = 6;
+	static constexpr int fieldHeightInTiles = 7;
 	static constexpr int fieldSizeInTiles = fieldWidthInTiles * fieldHeightInTiles;
 	static constexpr int xPositionOnScreen = Graphics::ScreenWidth / 2 - (fieldWidthInTiles * SpriteCodex::tileSize)/2;
 	static constexpr int yPositionOnScreen = Graphics::ScreenHeight / 2 - (fieldHeightInTiles * SpriteCodex::tileSize)/2;

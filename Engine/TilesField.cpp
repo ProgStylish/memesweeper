@@ -54,30 +54,12 @@ int TilesField::getMinesSurroundingNumber(const Vei2& positionInTiles) const
 	int minesCounter = 0;
 	if (positionInTiles.x > 0 && positionInTiles.x < fieldWidthInTiles - 1 &&
 		positionInTiles.y > 0 && positionInTiles.y < fieldHeightInTiles - 1) {
-
-		if (getTileAt(Vei2(positionInTiles.x - 1, positionInTiles.y - 1)).isMined()) {
-			minesCounter++;
-		}
-		if (getTileAt(Vei2(positionInTiles.x, positionInTiles.y - 1)).isMined()) {
-			minesCounter++;
-		}
-		if (getTileAt(Vei2(positionInTiles.x + 1, positionInTiles.y - 1)).isMined()) {
-			minesCounter++;
-		}
-		if (getTileAt(Vei2(positionInTiles.x - 1, positionInTiles.y)).isMined()) {
-			minesCounter++;
-		}
-		if (getTileAt(Vei2(positionInTiles.x + 1, positionInTiles.y)).isMined()) {
-			minesCounter++;
-		}
-		if (getTileAt(Vei2(positionInTiles.x - 1, positionInTiles.y + 1)).isMined()) {
-			minesCounter++;
-		}
-		if (getTileAt(Vei2(positionInTiles.x, positionInTiles.y + 1)).isMined()) {
-			minesCounter++;
-		}
-		if (getTileAt(Vei2(positionInTiles.x + 1, positionInTiles.y + 1)).isMined()) {
-			minesCounter++;
+		for (int i = positionInTiles.x - 1; i < positionInTiles.x + 2; i++) {
+			for (int j = positionInTiles.y - 1; j < positionInTiles.y + 2; j++) {
+				if (getTileAt(Vei2(i, j)).isMined()) {
+					minesCounter++;
+				}
+			}
 		}
 	}
 	return minesCounter;
@@ -87,10 +69,10 @@ int TilesField::getMinesSurroundingNumber(const Vei2& positionInTiles) const
 
 void TilesField::draw(Graphics& gfx) const
 {
-	gfx.DrawRect(playableWestXPosition, playableNorthyPosition, 
+	gfx.DrawRect(playableWestXPosition, playableNorthyPosition,
 		playableEastXPosition, playableSouthyPosition, Colors::LightGray);
-	for (int j = 1; j < fieldHeightInTiles-1; j++) {
-		for (int i = 1; i < fieldWidthInTiles-1; i++) {
+	for (int j = 1; j < fieldHeightInTiles - 1; j++) {
+		for (int i = 1; i < fieldWidthInTiles - 1; i++) {
 			getTileAt(Vei2(i, j)).draw(Vei2(i, j), gfx);
 		}
 	}
@@ -110,7 +92,12 @@ void TilesField::Tile::draw(const Vei2& positionInTiles, Graphics& gfx) const
 		break;
 	case State::Revealed:
 		if (mined) {
-			SpriteCodex::DrawTileBomb(positionInTiles * SpriteCodex::tileSize + positionDelta, gfx);
+			if (exploited) {
+				SpriteCodex::DrawTileBombRed(positionInTiles * SpriteCodex::tileSize + positionDelta, gfx);
+			}
+			else {
+				SpriteCodex::DrawTileBomb(positionInTiles * SpriteCodex::tileSize + positionDelta, gfx);
+			}
 		}
 		else {
 			switch (minesNumber) {
@@ -159,7 +146,21 @@ void TilesField::Tile::setMined(bool in_mined)
 
 void TilesField::Tile::reveal()
 {
-	state = State::Revealed;
+	if (state != State::Flagged) {
+		state = State::Revealed;
+	}
+}
+
+void TilesField::Tile::flag()
+{
+	if (state != State::Revealed) {
+		if (state != State::Flagged) {
+			state = State::Flagged;
+		}
+		else {
+			state = State::Hidden;
+		}
+	}
 }
 
 void TilesField::Tile::setMinesNumber(int in_minesNumber)
@@ -167,14 +168,81 @@ void TilesField::Tile::setMinesNumber(int in_minesNumber)
 	minesNumber = in_minesNumber;
 }
 
+bool TilesField::Tile::isExploited() const
+{
+	return exploited;
+}
+
+void TilesField::Tile::exploit()
+{
+	exploited = true;
+}
+
+TilesField::Tile::State TilesField::Tile::getState() const
+{
+	return state;
+}
+
+void TilesField::Tile::unFlag()
+{
+	state = State::Hidden;
+}
+
 void TilesField::revealTile(Vei2& positionInPixels)
 {
-	if (positionInPixels.x > playableWestXPosition && positionInPixels.x < playableEastXPosition &&
-		positionInPixels.y > playableNorthyPosition && positionInPixels.y < playableSouthyPosition) {
-		getTileAt((positionInPixels - Vei2(xPositionOnScreen, yPositionOnScreen)) / SpriteCodex::tileSize).reveal();
+	if (!fuckedUp) {
+		if (positionInPixels.x > playableWestXPosition && positionInPixels.x < playableEastXPosition &&
+			positionInPixels.y > playableNorthyPosition && positionInPixels.y < playableSouthyPosition) {
+			Vei2 tilePosition = (positionInPixels - Vei2(xPositionOnScreen, yPositionOnScreen)) / SpriteCodex::tileSize;
+			Tile& tile = getTileAt(tilePosition);
+			if (tile.getState() != Tile::State::Revealed && tile.getState() != Tile::State::Flagged) {
+				tile.reveal();
+				revealedTilesCounter += 1;
+				if (tile.isMined()) {
+					tile.exploit();
+					fuckedUp = true;
+					revealMinedTiles();
+				}
+				else  if (getMinesSurroundingNumber(tilePosition) == 0) {
+					revealNeighboursTiles(tilePosition);
+				}
+				else if (minesNumber == ((fieldWidthInTiles - 2) * (fieldHeightInTiles - 2) - revealedTilesCounter)) {
+					fuckedUp = true;
+				}
+			}
+		}
+	}
+}
+
+void TilesField::revealNeighboursTiles(const Vei2 tilePosition) {
+	if (tilePosition.x > 0 && tilePosition.x < fieldWidthInTiles - 1 &&
+		tilePosition.y > 0 && tilePosition.y < fieldHeightInTiles - 1) {
+		for (int i = tilePosition.x - 1; i < tilePosition.x + 2; i++) {
+			for (int j = tilePosition.y - 1; j < tilePosition.y + 2; j++) {
+				if (getTileAt(Vei2(i, j)).getState() != Tile::State::Revealed) {
+					getTileAt(Vei2(i, j)).reveal();
+					if (getMinesSurroundingNumber(Vei2(i, j)) == 0) {
+						revealNeighboursTiles(Vei2(i, j));
+					}
+				}
+			}
+		}
+	}
+}
+
+void TilesField::revealMinedTiles() {
+	for (int i = 1; i < fieldWidthInTiles - 1; i++) {
+		for (int j = 1; j < fieldHeightInTiles; j++) {
+			if (getTileAt(Vei2(i, j)).isMined()) {
+				getTileAt(Vei2(i, j)).reveal();
+			}
+		}
 	}
 }
 
 void TilesField::flagTile(Vei2& positionInPixels)
 {
+	if (!fuckedUp) {
+		getTileAt((positionInPixels - Vei2(xPositionOnScreen, yPositionOnScreen)) / SpriteCodex::tileSize).flag();
+	}
 }

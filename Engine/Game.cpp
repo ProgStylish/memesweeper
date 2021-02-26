@@ -26,7 +26,7 @@ Game::Game(MainWindow& wnd)
 	:
 	wnd(wnd),
 	gfx(wnd),
-	tilesField(20)
+	tilesField(2)
 {
 }
 
@@ -40,8 +40,17 @@ void Game::Go()
 
 void Game::UpdateModel()
 {
-	if (wnd.mouse.LeftIsPressed()) {
-		tilesField.revealTile(Vei2(wnd.mouse.GetPosX(), wnd.mouse.GetPosY()));
+	while (!wnd.mouse.IsEmpty())
+	{
+		const Mouse::Event e = wnd.mouse.Read();
+		switch(e.GetType()) {
+			case Mouse::Event::Type::LPress:
+				tilesField.revealTile(Vei2(e.GetPosX(), e.GetPosY()));
+				break;
+			case Mouse::Event::Type::RPress:
+				tilesField.flagTile(Vei2(e.GetPosX(), e.GetPosY()));
+				break;
+		}
 	}
 }
 
