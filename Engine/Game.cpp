@@ -26,7 +26,7 @@ Game::Game(MainWindow& wnd)
 	:
 	wnd(wnd),
 	gfx(wnd),
-	tilesField(2)
+	tilesField(2, 10, 10)
 {
 }
 

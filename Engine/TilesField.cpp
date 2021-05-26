@@ -1,12 +1,16 @@
 #include "TilesField.h"
 #include <random>
 
-TilesField::TilesField(int in_minesNumber) :
+TilesField::TilesField(int in_minesNumber, int width, int height) :
 	minesNumber(in_minesNumber),
 	rng(rd()),
-	horizontalRange(1, fieldWidthInTiles - 2),
-	verticalRange(1, fieldHeightInTiles - 2)
+	fieldWidthInTiles(width),
+	fieldHeightInTiles(height),
+	horizontalRange(1, width- 2),
+	verticalRange(1, height - 2)
 {
+	int size = width * height;
+	tilesArray = new Tile[size];
 	for (int i = 0; i < minesNumber; i++) {
 		Tile& currentTile = getTileAt(Vei2(horizontalRange(rng), verticalRange(rng)));
 		if (!currentTile.isMined()) {
@@ -73,12 +77,12 @@ void TilesField::draw(Graphics& gfx) const
 		playableEastXPosition, playableSouthyPosition, Colors::LightGray);
 	for (int j = 1; j < fieldHeightInTiles - 1; j++) {
 		for (int i = 1; i < fieldWidthInTiles - 1; i++) {
-			getTileAt(Vei2(i, j)).draw(Vei2(i, j), gfx);
+			getTileAt(Vei2(i, j)).draw(Vei2(i, j), xPositionOnScreen, yPositionOnScreen, gfx);
 		}
 	}
 }
 
-void TilesField::Tile::draw(const Vei2& positionInTiles, Graphics& gfx) const
+void TilesField::Tile::draw(const Vei2& positionInTiles, int xPositionOnScreen, int yPositionOnScreen, Graphics& gfx) const
 {
 	const Vei2 positionDelta = Vei2(xPositionOnScreen, yPositionOnScreen);
 	switch (state)

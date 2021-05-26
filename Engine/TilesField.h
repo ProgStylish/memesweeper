@@ -10,7 +10,7 @@ private:
 		enum class State {
 			Hidden, Revealed, Flagged
 		};
-		void draw(const Vei2& position, Graphics& gfx) const;
+		void draw(const Vei2& position, int xPositionOnScreen, int yPositionOnScreen, Graphics& gfx) const;
 		bool isMined() const;
 		void setMined(bool mined);
 		void reveal();
@@ -27,7 +27,7 @@ private:
 		State state = State::Hidden;
 	};
 public:
-	TilesField(int minesNumber);
+	TilesField(int minesNumber, int width, int height);
 	void draw(Graphics& gfx) const;
 	void revealTile(Vei2& positionInPixels);
 	void revealNeighboursTiles(const Vei2 tilePosition);
@@ -48,14 +48,13 @@ private:
 	std::uniform_int_distribution<int> horizontalRange;
 	std::uniform_int_distribution<int> verticalRange;
 	const int minesNumber;
-	static constexpr int fieldWidthInTiles = 6;
-	static constexpr int fieldHeightInTiles = 7;
-	static constexpr int fieldSizeInTiles = fieldWidthInTiles * fieldHeightInTiles;
-	static constexpr int xPositionOnScreen = Graphics::ScreenWidth / 2 - (fieldWidthInTiles * SpriteCodex::tileSize)/2;
-	static constexpr int yPositionOnScreen = Graphics::ScreenHeight / 2 - (fieldHeightInTiles * SpriteCodex::tileSize)/2;
-	static constexpr int playableWestXPosition = xPositionOnScreen + SpriteCodex::tileSize;
-	static constexpr int playableEastXPosition = xPositionOnScreen + (fieldWidthInTiles-1)*SpriteCodex::tileSize;
-	static constexpr int playableNorthyPosition = yPositionOnScreen + SpriteCodex::tileSize;
-	static constexpr int playableSouthyPosition = yPositionOnScreen + (fieldHeightInTiles-1)*SpriteCodex::tileSize;
-	Tile tilesArray[fieldSizeInTiles];
+	int fieldWidthInTiles;
+	int fieldHeightInTiles;
+	const int xPositionOnScreen = Graphics::ScreenWidth / 2 - (fieldWidthInTiles * SpriteCodex::tileSize)/2;
+	const int yPositionOnScreen = Graphics::ScreenHeight / 2 - (fieldHeightInTiles * SpriteCodex::tileSize)/2;
+	const int playableWestXPosition = xPositionOnScreen + SpriteCodex::tileSize;
+	const int playableEastXPosition = xPositionOnScreen + (fieldWidthInTiles-1)*SpriteCodex::tileSize;
+	const int playableNorthyPosition = yPositionOnScreen + SpriteCodex::tileSize;
+	const int playableSouthyPosition = yPositionOnScreen + (fieldHeightInTiles-1)*SpriteCodex::tileSize;
+	Tile* tilesArray = nullptr;
 };
