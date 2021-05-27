@@ -1,5 +1,5 @@
-/****************************************************************************************** 
- *	Chili DirectX Framework Version 16.07.20											  *	
+/******************************************************************************************
+ *	Chili DirectX Framework Version 16.07.20											  *
  *	Game.cpp																			  *
  *	Copyright 2016 PlanetChili.net <http://www.planetchili.net>							  *
  *																						  *
@@ -25,14 +25,13 @@
 Game::Game(MainWindow& wnd)
 	:
 	wnd(wnd),
-	gfx(wnd),
-	tilesField(2, 10, 10)
+	gfx(wnd)
 {
 }
 
 void Game::Go()
 {
-	gfx.BeginFrame();	
+	gfx.BeginFrame();
 	UpdateModel();
 	ComposeFrame();
 	gfx.EndFrame();
@@ -43,18 +42,31 @@ void Game::UpdateModel()
 	while (!wnd.mouse.IsEmpty())
 	{
 		const Mouse::Event e = wnd.mouse.Read();
-		switch(e.GetType()) {
+		if (!playing) {
+			mainMenu.sizeSelectedDefiner(Vei2(e.GetPosX(),e.GetPosY()));
+		}
+		else {
+			switch (e.GetType()) {
 			case Mouse::Event::Type::LPress:
-				tilesField.revealTile(Vei2(e.GetPosX(), e.GetPosY()));
+				tilesField->revealTile(Vei2(e.GetPosX(), e.GetPosY()));
 				break;
 			case Mouse::Event::Type::RPress:
-				tilesField.flagTile(Vei2(e.GetPosX(), e.GetPosY()));
+				tilesField->flagTile(Vei2(e.GetPosX(), e.GetPosY()));
 				break;
+			}
 		}
 	}
 }
 
 void Game::ComposeFrame()
 {
-	tilesField.draw(gfx);
+	if (!playing) {
+		mainMenu.draw(gfx);
+		RectI rect = RectI(Graphics::ScreenWidth/6,Graphics::ScreenWidth - Graphics::ScreenWidth/6, 0,Graphics::ScreenHeight/3);
+		mainMenu.highLight(gfx, rect);
+
+	}
+	else {
+		tilesField->draw(gfx);
+	}
 }

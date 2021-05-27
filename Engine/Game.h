@@ -1,5 +1,5 @@
-/****************************************************************************************** 
- *	Chili DirectX Framework Version 16.07.20											  *	
+/******************************************************************************************
+ *	Chili DirectX Framework Version 16.07.20											  *
  *	Game.h																				  *
  *	Copyright 2016 PlanetChili.net <http://www.planetchili.net>							  *
  *																						  *
@@ -23,14 +23,21 @@
 #include "Keyboard.h"
 #include "Mouse.h"
 #include "Graphics.h"
+#include "MainMenu.h"
 #include "TilesField.h"
 
 class Game
 {
+private:
+	enum class State
+	{
+		SelectionMenu,
+		Memesweeper
+	};
 public:
-	Game( class MainWindow& wnd );
-	Game( const Game& ) = delete;
-	Game& operator=( const Game& ) = delete;
+	Game(class MainWindow& wnd);
+	Game(const Game&) = delete;
+	Game& operator=(const Game&) = delete;
 	void Go();
 private:
 	void ComposeFrame();
@@ -41,7 +48,9 @@ private:
 private:
 	MainWindow& wnd;
 	Graphics gfx;
-	TilesField tilesField;
+	bool playing = false;
+	MainMenu mainMenu = MainMenu();
+	TilesField* tilesField = nullptr;
 	/********************************/
 	/*  User Variables              */
 	/********************************/
