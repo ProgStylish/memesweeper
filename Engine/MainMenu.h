@@ -3,6 +3,9 @@
 #include "Vei2.h"
 #include "RectI.h"
 #include "Colors.h"
+#include "SpriteCodex.h"
+#include "Mouse.h"
+#include "TilesField.h"
 class MainMenu {
 public:
 	enum class Size {
@@ -14,9 +17,8 @@ public:
 	MainMenu() = default;
 	void draw(Graphics& gfx) const;
 	void sizeSelectedDefiner(Vei2& position);
-	void highLight(Graphics& gfx, RectI& rect) const;
+	void highLight(Graphics& gfx) const;
+	Size selectedSizeProcessor();
 private:
-	int xCenterPosition;
-	int yCenterPosition;
 	Size size = Size::None;
 };

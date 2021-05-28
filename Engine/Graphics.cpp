@@ -43,7 +43,6 @@ using Microsoft::WRL::ComPtr;
 Graphics::Graphics( HWNDKey& key )
 {
 	assert( key.hWnd != nullptr );
-
 	//////////////////////////////////////////////////////
 	// create device and swap chain/get render target view
 	DXGI_SWAP_CHAIN_DESC sd = {};
@@ -238,6 +237,30 @@ Graphics::Graphics( HWNDKey& key )
 	// allocate memory for sysbuffer (16-byte aligned for faster access)
 	pSysBuffer = reinterpret_cast<Color*>( 
 		_aligned_malloc( sizeof( Color ) * Graphics::ScreenWidth * Graphics::ScreenHeight,16u ) );
+}
+
+void Graphics::DrawBorderRect(int x0, int y0, int x1, int y1, int width, Color c)
+{
+	for (int i = y0; i < y0 + width; i++) {
+		for (int j = x0; j < x1; j++) {
+			PutPixel(j, i, c);
+		}
+	}
+	for (int i = y1 - width; i < y1; i++) {
+		for (int j = x0; j < x1; j++) {
+			PutPixel(j, i, c);
+		}
+	}
+	for (int i = x0; i < x0 + width; i++) {
+		for (int j = y0; j < y1; j++) {
+			PutPixel(i, j, c);
+		}
+	}
+	for (int i = x1 - width; i < x1; i++) {
+		for (int j = y0; j < y1; j++) {
+			PutPixel(i, j, c);
+		}
+	}
 }
 
 Graphics::~Graphics()

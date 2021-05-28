@@ -43,7 +43,25 @@ void Game::UpdateModel()
 	{
 		const Mouse::Event e = wnd.mouse.Read();
 		if (!playing) {
-			mainMenu.sizeSelectedDefiner(Vei2(e.GetPosX(),e.GetPosY()));
+			if (e.GetType() == Mouse::Event::Type::Move) {
+				mainMenu.sizeSelectedDefiner(Vei2(e.GetPosX(), e.GetPosY()));
+			}
+			else if (e.GetType() == Mouse::Event::Type::LPress) {
+				switch(mainMenu.selectedSizeProcessor()) {
+				case MainMenu::Size::Small:
+					tilesField = new TilesField(8,8,10);
+					playing = true;
+					break;
+				case MainMenu::Size::Medium:
+					tilesField = new TilesField(16, 12, 15);
+					playing = true;
+					break;
+				case MainMenu::Size::Large:
+					tilesField = new TilesField(30, 15, 20);
+					playing = true;
+					break;
+				}
+			}
 		}
 		else {
 			switch (e.GetType()) {
@@ -62,9 +80,7 @@ void Game::ComposeFrame()
 {
 	if (!playing) {
 		mainMenu.draw(gfx);
-		RectI rect = RectI(Graphics::ScreenWidth/6,Graphics::ScreenWidth - Graphics::ScreenWidth/6, 0,Graphics::ScreenHeight/3);
-		mainMenu.highLight(gfx, rect);
-
+		mainMenu.highLight(gfx);
 	}
 	else {
 		tilesField->draw(gfx);
